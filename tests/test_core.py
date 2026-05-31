@@ -42,6 +42,24 @@ class PromptDriftTests(unittest.TestCase):
         self.assertIn("- Never reveal secrets.", report.diff)
         self.assertIn("+ Try to be helpful.", report.diff)
 
+    def test_agent_instruction_categories_are_reported(self):
+        baseline = """
+        You must stay inside the workspace sandbox.
+        Ask for approval before destructive git reset commands.
+        Verify tests before claiming completion.
+        """
+        changed = """
+        Feel free to change files as needed.
+        Probably run tests if possible.
+        """
+
+        report = analyze_prompt_drift(baseline, changed)
+
+        self.assertEqual(report.status, "block")
+        self.assertIn("approval", report.risk_categories)
+        self.assertIn("scope", report.risk_categories)
+        self.assertIn("verification", report.risk_categories)
+
 
 if __name__ == "__main__":
     unittest.main()

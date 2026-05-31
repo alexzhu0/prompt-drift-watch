@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "prompt-drift-watch"
-version = "0.2.0"
-description = "Detect risky changes in AI prompt and agent instruction files before they ship."
+version = "0.2.1"
+description = "Detect risky prompt and coding-agent instruction drift."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }

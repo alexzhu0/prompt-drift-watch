@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.1 - 2026-05-31
+
+- Added coding-agent instruction examples for AGENTS.md-style drift.
+- Added risk categories for approval, citation, safety, scope, and verification.
+- Added GitHub Actions annotation output with `--format github`.
+- Expanded default terms for sandbox, workspace, destructive commands, and vague agent behavior.
+
 ## v0.2.0 - 2026-05-31
 
 - Added custom rule packs with `--rules`.

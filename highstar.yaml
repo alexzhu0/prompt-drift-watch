@@ -1,12 +1,12 @@
 name: prompt-drift-watch
-one_liner: Detect risky changes in AI prompt and agent instruction files before they ship.
+one_liner: Detect risky prompt and coding-agent instruction drift.
 target_user: AI agent developers and LLM product engineers
-pain_point: Prompt changes often remove hidden guardrails or add vague instructions that reviewers miss in a normal diff.
-demo_command: PYTHONPATH=src python3 -m prompt_drift_watch examples/baseline_prompt.md examples/changed_prompt.md
+pain_point: Prompt and agent rule changes often remove hidden guardrails that reviewers miss in a normal diff.
+demo_command: PYTHONPATH=src python3 -m prompt_drift_watch examples/baseline_agents.md examples/changed_agents.md --format github
 tier: flagship
-maturity_status: polished-2026-05-31
-next_release: v0.2.0
-polish_score: 92
+maturity_status: trend-aligned-2026-05-31
+next_release: v0.2.1
+polish_score: 94
 topics:
   - ai-tools
   - prompt-engineering
@@ -19,9 +19,9 @@ release_channel:
   - ai-engineering-communities
   - developer-tooling-discussions
 launch_copy:
-  - I built prompt-drift-watch to catch risky prompt and agent instruction changes before they ship.
-  - It flags removed guardrails and vague additions in one local CLI command.
-  - Try it with PYTHONPATH=src python3 -m prompt_drift_watch examples/baseline_prompt.md examples/changed_prompt.md
+  - I built prompt-drift-watch to catch risky prompt and coding-agent instruction drift before it ships.
+  - It flags removed guardrails, vague additions, risk categories, and GitHub Actions annotations in one local CLI command.
+  - Try it with PYTHONPATH=src python3 -m prompt_drift_watch examples/baseline_agents.md examples/changed_agents.md --format github
 quality_gate:
   commands:
     - python3 -m unittest discover -s tests

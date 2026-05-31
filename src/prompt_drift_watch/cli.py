@@ -18,7 +18,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("changed", help="Changed prompt or instruction file")
     parser.add_argument(
         "--format",
-        choices=["text", "json"],
+        choices=["text", "github", "json"],
         default="text",
         help="Output format",
     )
@@ -71,12 +71,31 @@ def format_text(report: DriftReport, show_diff: bool = False) -> str:
         lines.append("Vague additions:")
         lines.extend(f"- {line}" for line in report.vague_additions)
         lines.append("")
+    if report.risk_categories:
+        lines.append("Risk categories:")
+        lines.extend(f"- {name}" for name in report.risk_categories)
+        lines.append("")
     if show_diff and report.diff:
         lines.append("Diff snippets:")
         lines.extend(report.diff)
         lines.append("")
     lines.append(report.summary)
     return "\n".join(lines).rstrip()
+
+
+def format_github(report: DriftReport) -> str:
+    level = "error" if report.status == "block" else "warning" if report.status == "review" else "notice"
+    lines = [
+        f"::{level} title=prompt-drift-watch::{report.summary}",
+        f"risk_score={report.risk_score}",
+        f"status={report.status}",
+        f"rule_pack={report.rule_pack}",
+    ]
+    if report.risk_categories:
+        lines.append("risk_categories=" + ",".join(report.risk_categories))
+    for line in report.diff:
+        lines.append(line)
+    return "\n".join(lines)
 
 
 def run(
@@ -96,6 +115,8 @@ def run(
     )
     if output_format == "json":
         return report.to_json()
+    if output_format == "github":
+        return format_github(report)
     return format_text(report, show_diff=show_diff)
 
 
@@ -110,7 +131,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         vague_terms=vague,
         rule_pack=rule_pack,
     )
-    print(report.to_json() if args.format == "json" else format_text(report, args.show_diff))
+    if args.format == "json":
+        print(report.to_json())
+    elif args.format == "github":
+        print(format_github(report))
+    else:
+        print(format_text(report, args.show_diff))
     if args.fail_on_risk is not None and report.risk_score >= args.fail_on_risk:
         return 2
     return 0

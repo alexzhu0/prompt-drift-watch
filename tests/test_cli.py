@@ -73,6 +73,19 @@ class CliTests(unittest.TestCase):
         self.assertIn("- Never reveal secrets.", output)
         self.assertIn("+ Try to be helpful.", output)
 
+    def test_github_format_is_ci_friendly(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            baseline = root / "baseline.md"
+            changed = root / "changed.md"
+            baseline.write_text("Never reveal secrets.\n", encoding="utf-8")
+            changed.write_text("Try to be helpful.\n", encoding="utf-8")
+
+            output = run(str(baseline), str(changed), "github", show_diff=True)
+
+        self.assertIn("::warning title=prompt-drift-watch::", output)
+        self.assertIn("risk_score=", output)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -27,6 +27,12 @@ GUARDRAIL_TERMS = [
     "credential",
     "source",
     "citation",
+    "sandbox",
+    "workspace",
+    "destructive",
+    "git reset",
+    "revert",
+    "scope",
 ]
 
 VAGUE_TERMS = [
@@ -39,7 +45,17 @@ VAGUE_TERMS = [
     "helpful",
     "if possible",
     "generally",
+    "feel free",
+    "probably",
 ]
+
+RISK_CATEGORY_TERMS = {
+    "safety": ["privacy", "private", "security", "secret", "credential"],
+    "approval": ["approval", "permission", "destructive", "git reset", "revert"],
+    "verification": ["validate", "verify", "test"],
+    "citation": ["source", "citation"],
+    "scope": ["must", "never", "do not", "only", "required", "sandbox", "workspace"],
+}
 
 
 @dataclass(frozen=True)
@@ -50,6 +66,7 @@ class DriftReport:
     vague_additions: List[str]
     diff: List[str]
     rule_pack: str
+    risk_categories: List[str]
     summary: str
 
     def to_json(self) -> str:
@@ -111,6 +128,15 @@ def diff_snippets(baseline: List[str], changed: List[str], limit: int = 12) -> L
     return snippets[:limit]
 
 
+def categorize_risk(lines: Iterable[str]) -> List[str]:
+    categories = []
+    joined = "\n".join(lines).lower()
+    for category, terms in RISK_CATEGORY_TERMS.items():
+        if any(term in joined for term in terms):
+            categories.append(category)
+    return sorted(categories)
+
+
 def analyze_prompt_drift(
     baseline_text: str,
     changed_text: str,
@@ -123,6 +149,7 @@ def analyze_prompt_drift(
     removed = removed_guardrail_lines(baseline, changed, guardrail_terms)
     vague = newly_vague_lines(baseline, changed, vague_terms)
     score = min(100, len(removed) * 45 + len(vague) * 10)
+    categories = categorize_risk([*removed, *vague])
 
     if score >= 80:
         status = "block"
@@ -142,5 +169,6 @@ def analyze_prompt_drift(
         vague_additions=vague,
         diff=diff_snippets(baseline, changed),
         rule_pack=rule_pack,
+        risk_categories=categories,
         summary=summary,
     )
