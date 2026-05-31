@@ -1,18 +1,12 @@
 # Prompt Drift Watch
 
-Detect risky changes in AI prompt and agent instruction files before they ship.
+Detect risky prompt and agent instruction changes before they ship.
 
 ## Why
 
-Prompt and agent instruction diffs are easy to skim and hard to judge. A small wording change can remove a guardrail, soften a requirement, or add vague language that makes downstream behavior less reliable.
+Prompt diffs often look harmless while removing guardrails, weakening safety wording, or adding vague behavior.
 
-`prompt-drift-watch` compares a baseline prompt with a changed prompt and highlights:
-
-- Removed guardrail lines.
-- Newly added vague instructions.
-- A simple risk score that can be used in review or CI.
-
-It is intentionally local and dependency-free.
+This is a flagship HighStar AI developer tool: dependency-light, local-first, and built around one quick command.
 
 ## Install
 
@@ -25,72 +19,73 @@ PYTHONPATH=src python3 -m unittest discover -s tests
 ## Quickstart
 
 ```bash
-PYTHONPATH=src python3 -m prompt_drift_watch examples/baseline_prompt.md examples/changed_prompt.md
-```
-
-Example output:
-
-```text
-Risk score: 55
-Status: review
-
-Removed guardrails:
-- Never reveal secrets, credentials, or private user data.
-
-Vague additions:
-- Try to be helpful where appropriate.
+PYTHONPATH=src python3 -m prompt_drift_watch examples/baseline_prompt.md examples/changed_prompt.md --show-diff
 ```
 
 ## Examples
 
-Write JSON for a CI step:
+Human-readable output:
+
+```bash
+PYTHONPATH=src python3 -m prompt_drift_watch examples/baseline_prompt.md examples/changed_prompt.md --show-diff
+```
+
+Machine-readable output:
 
 ```bash
 PYTHONPATH=src python3 -m prompt_drift_watch examples/baseline_prompt.md examples/changed_prompt.md --format json
 ```
 
-Fail when risk is high:
+## CLI Reference
 
-```bash
-PYTHONPATH=src python3 -m prompt_drift_watch examples/baseline_prompt.md examples/changed_prompt.md --fail-on-risk 50
-```
+- `PYTHONPATH=src python3 -m prompt_drift_watch --help`
+- Main demo: `PYTHONPATH=src python3 -m prompt_drift_watch examples/baseline_prompt.md examples/changed_prompt.md --show-diff`
+- CI gate: `PYTHONPATH=src python3 -m unittest discover -s tests`
+
+## Features
+
+- Removed guardrail detection
+- New vague-instruction detection
+- Compact diff snippets for review
+- JSON output for CI artifacts
+- Custom JSON rule packs
+- Risk threshold exit codes
 
 ## API
 
-The public Python API is small:
+The public Python surface is intentionally small:
 
 ```python
 from prompt_drift_watch.core import analyze_prompt_drift
-
-result = analyze_prompt_drift(baseline_text, changed_text)
-print(result.risk_score)
 ```
 
-`analyze_prompt_drift` returns a `DriftReport` dataclass with:
+Use the CLI first. Import the Python functions when you want to embed the same behavior in a larger tool.
 
-- `risk_score`
-- `status`
-- `removed_guardrails`
-- `vague_additions`
-- `summary`
+## Why Star This
+
+It gives prompt reviewers a deterministic first-pass risk signal without needing a hosted eval stack.
+
+## Roadmap
+
+See [ROADMAP.md](ROADMAP.md).
 
 ## FAQ
 
-**Does this call an AI model?**
+**Does this call external AI APIs?**
 
-No. The first version is deterministic and standard-library only.
+No. The current release uses the Python standard library only.
 
-**Does this replace human prompt review?**
+**Is this production-ready?**
 
-No. It is a pre-review signal that catches easy-to-miss risk.
+Treat this as a focused utility. Run it in CI or local review first, then adapt thresholds and examples to your workflow.
 
-**Can I tune the rules?**
+**Can I contribute examples?**
 
-The first version ships with fixed heuristics. Rule configuration is a good `v0.2.0` candidate after real examples arrive.
+Yes. The most useful issue or pull request includes a real input file, expected output, and the workflow where it helps.
 
 ## Contributing
 
-Issues and pull requests are welcome when they include a concrete prompt diff and expected output.
+Issues and pull requests are welcome when they include a concrete use case or failing example.
 
 Run tests before opening a pull request:
 
@@ -101,4 +96,3 @@ PYTHONPATH=src python3 -m unittest discover -s tests
 ## License
 
 MIT
-

@@ -36,6 +36,12 @@ class PromptDriftTests(unittest.TestCase):
     def test_meaningful_lines_strips_markdown_markers(self):
         self.assertEqual(meaningful_lines("- **Never** reveal secrets."), ["Never reveal secrets."])
 
+    def test_report_includes_diff_snippets(self):
+        report = analyze_prompt_drift("Never reveal secrets.", "Try to be helpful.")
+
+        self.assertIn("- Never reveal secrets.", report.diff)
+        self.assertIn("+ Try to be helpful.", report.diff)
+
 
 if __name__ == "__main__":
     unittest.main()

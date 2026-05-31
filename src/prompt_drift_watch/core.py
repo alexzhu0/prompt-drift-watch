@@ -48,6 +48,8 @@ class DriftReport:
     status: str
     removed_guardrails: List[str]
     vague_additions: List[str]
+    diff: List[str]
+    rule_pack: str
     summary: str
 
     def to_json(self) -> str:
@@ -75,29 +77,51 @@ def contains_any(line: str, terms: Iterable[str]) -> bool:
     return any(term in lower for term in terms)
 
 
-def removed_guardrail_lines(baseline: List[str], changed: List[str]) -> List[str]:
+def removed_guardrail_lines(
+    baseline: List[str],
+    changed: List[str],
+    guardrail_terms: Iterable[str] = GUARDRAIL_TERMS,
+) -> List[str]:
     changed_set = {line.lower() for line in changed}
     removed = []
     for line in baseline:
-        if line.lower() not in changed_set and contains_any(line, GUARDRAIL_TERMS):
+        if line.lower() not in changed_set and contains_any(line, guardrail_terms):
             removed.append(line)
     return removed
 
 
-def newly_vague_lines(baseline: List[str], changed: List[str]) -> List[str]:
+def newly_vague_lines(
+    baseline: List[str],
+    changed: List[str],
+    vague_terms: Iterable[str] = VAGUE_TERMS,
+) -> List[str]:
     baseline_set = {line.lower() for line in baseline}
     vague = []
     for line in changed:
-        if line.lower() not in baseline_set and contains_any(line, VAGUE_TERMS):
+        if line.lower() not in baseline_set and contains_any(line, vague_terms):
             vague.append(line)
     return vague
 
 
-def analyze_prompt_drift(baseline_text: str, changed_text: str) -> DriftReport:
+def diff_snippets(baseline: List[str], changed: List[str], limit: int = 12) -> List[str]:
+    baseline_set = {line.lower() for line in baseline}
+    changed_set = {line.lower() for line in changed}
+    snippets = [f"- {line}" for line in baseline if line.lower() not in changed_set]
+    snippets.extend(f"+ {line}" for line in changed if line.lower() not in baseline_set)
+    return snippets[:limit]
+
+
+def analyze_prompt_drift(
+    baseline_text: str,
+    changed_text: str,
+    guardrail_terms: Iterable[str] = GUARDRAIL_TERMS,
+    vague_terms: Iterable[str] = VAGUE_TERMS,
+    rule_pack: str = "default",
+) -> DriftReport:
     baseline = meaningful_lines(baseline_text)
     changed = meaningful_lines(changed_text)
-    removed = removed_guardrail_lines(baseline, changed)
-    vague = newly_vague_lines(baseline, changed)
+    removed = removed_guardrail_lines(baseline, changed, guardrail_terms)
+    vague = newly_vague_lines(baseline, changed, vague_terms)
     score = min(100, len(removed) * 45 + len(vague) * 10)
 
     if score >= 80:
@@ -116,5 +140,7 @@ def analyze_prompt_drift(baseline_text: str, changed_text: str) -> DriftReport:
         status=status,
         removed_guardrails=removed,
         vague_additions=vague,
+        diff=diff_snippets(baseline, changed),
+        rule_pack=rule_pack,
         summary=summary,
     )

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "prompt-drift-watch"
-version = "0.1.0"
+version = "0.2.0"
 description = "Detect risky changes in AI prompt and agent instruction files before they ship."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -24,4 +24,3 @@ prompt-drift-watch = "prompt_drift_watch.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-
