@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+  <rect width="1280" height="640" fill="#101418"/>
+  <rect x="64" y="64" width="1152" height="512" rx="24" fill="#f5f7fa"/>
+  <text x="112" y="182" fill="#101418" font-family="Arial, Helvetica, sans-serif" font-size="70" font-weight="700">prompt-drift-watch</text>
+  <text x="112" y="282" fill="#26313d" font-family="Arial, Helvetica, sans-serif" font-size="38">Catch risky AI prompt changes before they ship.</text>
+  <text x="112" y="420" fill="#53606d" font-family="Arial, Helvetica, sans-serif" font-size="30">Removed guardrails · vague additions · CI risk score</text>
+  <text x="112" y="500" fill="#0f766e" font-family="Arial, Helvetica, sans-serif" font-size="26">python3 -m prompt_drift_watch baseline.md changed.md</text>
+</svg>
+
